@@ -33,7 +33,7 @@ module single_cpu #(
     pc pc_inst(.npc(npc), .pc_out(pc_out), .clk(clk), .rst(rst));
 
     logic [DATAWIDTH-1:0] instr;
-    instr_rom instr_rom_inst(.ena(ena), .daddr(pc), .dout(instr));
+    instr_rom instr_rom_inst(.ena(ena), .daddr(pc_out), .dout(instr));
 
     logic Branch, MemToReg, MemWrite, ALUSrc, Regwrite;
     logic [1:0] ALUOP;
@@ -61,8 +61,8 @@ module single_cpu #(
     mux mux2(.A(aluresult), .B(dmdata), .control(MemToReg), .Result(wrdata));
 
     logic [DATAWIDTH-1:0] npc1,npc2;
-    adder adder1(.A(pc), .B(4), .Result(npc1));
-    adder adder2(.A(pc), .B(imm), .Result(npc2));
+    adder adder1(.A(pc_out), .B(4), .Result(npc1));
+    adder adder2(.A(pc_out), .B(imm), .Result(npc2));
 
     assign npc = (Branch && Z) ? npc2 : npc1;
 
