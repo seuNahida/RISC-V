@@ -37,8 +37,7 @@ module data_ram#(
     reg [RAMWIDTH - 1 : 0] ram [2**(RAMDEPTH) - 1 : 0];
 
     always_ff @(posedge clk or posedge rst) begin
-        if(rst) begin 
-            for(int i=0; i<2**(RAMDEPTH);i++) ram[i] <= '0;
+        if(rst) begin
         end else if(ena && wen) begin
             {ram[daddr+3],ram[daddr+2],ram[daddr+1],ram[daddr]} <= din;
         end

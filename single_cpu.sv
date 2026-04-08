@@ -25,10 +25,12 @@ module single_cpu #(
 )(
     input logic clk,
     input logic rst,
-    input logic ena,
     output logic [DATAWIDTH-1:0] pc_out
     );
-
+    
+    logic ena;
+    assign ena = 1;
+    
     logic [DATAWIDTH-1:0] npc;
     pc pc_inst(.npc(npc), .pc_out(pc_out), .clk(clk), .rst(rst));
 
