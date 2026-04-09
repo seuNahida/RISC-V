@@ -29,6 +29,7 @@ module data_ram#(
     input logic rst,
     input logic ena,
     input logic wen,
+    input logic [3:0] we,
     input logic [DATAWIDTH - 1 : 0] din,
     input logic [DATAWIDTH - 1 : 0] daddr,
     output logic [DATAWIDTH - 1 : 0] dout
@@ -39,7 +40,10 @@ module data_ram#(
     always_ff @(posedge clk or posedge rst) begin
         if(rst) begin
         end else if(ena && wen) begin
-            {ram[daddr+3],ram[daddr+2],ram[daddr+1],ram[daddr]} <= din;
+            if(we[0]) ram[daddr] <= din[7:0];
+            if(we[1]) ram[daddr+1] <= din[15:8];
+            if(we[2]) ram[daddr+2] <= din[23:16];
+            if(we[3]) ram[daddr+3] <= din[31:24];
         end
     end
 

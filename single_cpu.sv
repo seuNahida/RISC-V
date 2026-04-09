@@ -65,18 +65,19 @@ module single_cpu #(
 
     //temp
     logic [DATAWIDTH-1:0] alur1;
-    mux mux2(.A(r1data), .B(pc), .control(instr[6:0]==7'h17), .Result(alur1));
+    mux mux2(.A(r1data), .B(pc_out), .control(instr[6:0]==7'h17), .Result(alur1));
 
     logic [DATAWIDTH-1:0] aluresult;
     logic N, V, Z, C;
     ALU ALU(.a(alur1), .b(aluinputb), .Control(alucontrolflag), .result(aluresult), .N(N), .V(V), .Z(Z), .C(C));
 
-    word_ex wordEx1(.funct(instr[14:12]), .out_temp(r2data), .out(din));
+    logic [3:0] we;
+    store_ex storeEx(.funct(instr[14:12]), .out_temp(r2data), .out(din), .we(we));
 
     logic [DATAWIDTH-1:0] dmdata_temp, dmdata;
-    data_ram data_ram_inst(.clk(clk), .rst(rst), .ena(ena), .wen(MemWrite), .din(din), .daddr(aluresult), .dout(dmdata_temp));
+    data_ram data_ram_inst(.clk(clk), .rst(rst), .ena(ena), .wen(MemWrite), .we(we), .din(din), .daddr(aluresult), .dout(dmdata_temp));
 
-    word_ex wordEx2(.funct(instr[14:12]), .out_temp(dmdata_temp), .out(dmdata));
+    word_ex wordEx(.funct(instr[14:12]), .out_temp(dmdata_temp), .out(dmdata));
 
     logic [DATAWIDTH-1:0] torf_result; 
     toRF RFback(.RegWriteSrc(RegWriteSrc), .npc_n(npc1), .alu_result(aluresult), .dm_result(dmdata), .imm(imm), .result(torf_result));

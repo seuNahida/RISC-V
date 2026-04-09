@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 2026/04/09 20:27:42
+// Create Date: 2026/04/09 21:09:22
 // Design Name: 
-// Module Name: word_ex
+// Module Name: store_ex
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,22 +20,31 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module word_ex #(
+module store_ex #(
     parameter DATAWIDTH = 32
 )(
     input logic[2:0] funct,
     input logic [DATAWIDTH - 1 : 0] out_temp,
-    output logic [DATAWIDTH - 1 : 0] out
+    output logic [DATAWIDTH - 1 : 0] out,
+    output logic [3:0] we
 );
 
     always_comb begin
+        out = '0;
         case(funct)
-            3'b010: out = out_temp;
-            3'b001: out = {{16{out_temp[15]}}, out_temp[15:0]};
-            3'b101: out = {16'b0, out_temp[15:0]};
-            3'b000: out = {{24{out_temp[7]}}, out_temp[7:0]};
-            3'b100: out = {24'b0, out_temp[7:0]};
-            default: out = out_temp;
+            3'b010: begin 
+                out = out_temp;
+                we = 4'b1111;
+            end
+            3'b001: begin
+                out = {16'b0, out_temp[15:0]};
+                we = 4'b0011;
+            end
+            3'b000: begin 
+                out = {24'b0, out_temp[7:0]};
+                we = 4'b0001;
+            end
+            default: we = 4'b0000;
         endcase
     end
 endmodule
