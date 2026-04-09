@@ -28,8 +28,8 @@ module ALU_controller(
 
     always_comb begin
         casex(ALUOP)
-            3'b000: ALUControl = 2'b0000;
-            3'b001: ALUControl = 2'b0001;
+            3'b000: ALUControl = 4'b0000;
+            3'b001: ALUControl = 4'b0001;
             3'b010: begin
                 case(funct)
                     4'b0000: ALUControl = 4'b0000;
@@ -60,7 +60,7 @@ module ALU_controller(
                 endcase
             end
             3'b101: ALUControl = 4'b1010;
-            default: ALUControl = 4'b00;
+            default: ALUControl = 4'b0000;
         endcase
     end
 endmodule

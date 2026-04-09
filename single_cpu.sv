@@ -38,7 +38,7 @@ module single_cpu #(
     instr_rom instr_rom_inst(.ena(ena), .daddr(pc_out), .dout(instr));
 
     logic [2:0] Branch;
-    logic MemToReg, MemWrite, ALUSrc, Regwrite, Jump;
+    logic MemWrite, ALUSrc, Regwrite, Jump;
     logic [1:0] RegWriteSrc;
     logic [2:0] ALUOP;
     control col(.opcode(instr[6:0]), 
@@ -51,7 +51,7 @@ module single_cpu #(
                 .RegWrite(Regwrite),
                 .Jump(Jump));
 
-    logic [DATAWIDTH-1:0] r1data, r2data, wrdata;
+    logic [DATAWIDTH-1:0] r1data, r2data;
     reg_file reg_file_inst(.clk(clk), .rst(rst), .wr_reg_en(Regwrite), .wr_reg_addr(instr[11:7]), .wr_wdata(torf_result), .rs_reg1_addr(instr[19:15]), .rs_reg2_addr(instr[24:20]), .rs_reg1_rdata(r1data), .rs_reg2_rdata(r2data));
 
     logic [DATAWIDTH-1:0] imm;
@@ -63,12 +63,20 @@ module single_cpu #(
     logic [DATAWIDTH-1:0] aluinputb;
     mux mux1(.A(r2data), .B(imm), .control(ALUSrc), .Result(aluinputb));
 
+    //temp
+    logic [DATAWIDTH-1:0] alur1;
+    mux mux2(.A(r1data), .B(pc), .control(instr[6:0]==7'h17), .Result(alur1));
+
     logic [DATAWIDTH-1:0] aluresult;
     logic N, V, Z, C;
-    ALU ALU(.a(r1data), .b(aluinputb), .Control(alucontrolflag), .result(aluresult), .N(N), .V(V), .Z(Z), .C(C));
+    ALU ALU(.a(alur1), .b(aluinputb), .Control(alucontrolflag), .result(aluresult), .N(N), .V(V), .Z(Z), .C(C));
 
-    logic [DATAWIDTH-1:0] dmdata;
-    data_ram data_ram_inst(.clk(clk), .rst(rst), .ena(ena), .wen(MemWrite), .din(r2data), .daddr(aluresult), .dout(dmdata));
+    word_ex wordEx1(.funct(instr[14:12]), .out_temp(r2data), .out(din));
+
+    logic [DATAWIDTH-1:0] dmdata_temp, dmdata;
+    data_ram data_ram_inst(.clk(clk), .rst(rst), .ena(ena), .wen(MemWrite), .din(din), .daddr(aluresult), .dout(dmdata_temp));
+
+    word_ex wordEx2(.funct(instr[14:12]), .out_temp(dmdata_temp), .out(dmdata));
 
     logic [DATAWIDTH-1:0] torf_result; 
     toRF RFback(.RegWriteSrc(RegWriteSrc), .npc_n(npc1), .alu_result(aluresult), .dm_result(dmdata), .imm(imm), .result(torf_result));
