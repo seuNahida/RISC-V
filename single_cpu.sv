@@ -37,17 +37,27 @@ module single_cpu #(
     logic [DATAWIDTH-1:0] instr;
     instr_rom instr_rom_inst(.ena(ena), .daddr(pc_out), .dout(instr));
 
-    logic Branch, MemToReg, MemWrite, ALUSrc, Regwrite;
-    logic [1:0] ALUOP;
-    control col(.opcode(instr[6:0]), .Branch(Branch), .MemToReg(MemToReg), .MemWrite(MemWrite), .ALUOP(ALUOP), .ALUSrc(ALUSrc), .RegWrite(Regwrite));
+    logic [2:0] Branch;
+    logic MemToReg, MemWrite, ALUSrc, Regwrite, Jump;
+    logic [1:0] RegWriteSrc;
+    logic [2:0] ALUOP;
+    control col(.opcode(instr[6:0]), 
+                .branch_type(instr[14:12]), 
+                .Branch(Branch), 
+                .RegWriteSrc(RegWriteSrc), 
+                .MemWrite(MemWrite), 
+                .ALUOP(ALUOP), 
+                .ALUSrc(ALUSrc), 
+                .RegWrite(Regwrite),
+                .Jump(Jump));
 
     logic [DATAWIDTH-1:0] r1data, r2data, wrdata;
-    reg_file reg_file_inst(.clk(clk), .rst(rst), .wr_reg_en(Regwrite), .wr_reg_addr(instr[11:7]), .wr_wdata(wrdata), .rs_reg1_addr(instr[19:15]), .rs_reg2_addr(instr[24:20]), .rs_reg1_rdata(r1data), .rs_reg2_rdata(r2data));
+    reg_file reg_file_inst(.clk(clk), .rst(rst), .wr_reg_en(Regwrite), .wr_reg_addr(instr[11:7]), .wr_wdata(torf_result), .rs_reg1_addr(instr[19:15]), .rs_reg2_addr(instr[24:20]), .rs_reg1_rdata(r1data), .rs_reg2_rdata(r2data));
 
     logic [DATAWIDTH-1:0] imm;
     imm_gen immgen(.instr(instr[31:0]), .imm(imm));
 
-    logic [1:0] alucontrolflag;
+    logic [3:0] alucontrolflag;
     ALU_controller alucontrol(.funct({instr[30],instr[14:12]}), .ALUOP(ALUOP), .ALUControl(alucontrolflag));
 
     logic [DATAWIDTH-1:0] aluinputb;
@@ -60,12 +70,16 @@ module single_cpu #(
     logic [DATAWIDTH-1:0] dmdata;
     data_ram data_ram_inst(.clk(clk), .rst(rst), .ena(ena), .wen(MemWrite), .din(r2data), .daddr(aluresult), .dout(dmdata));
 
-    mux mux2(.A(aluresult), .B(dmdata), .control(MemToReg), .Result(wrdata));
+    logic [DATAWIDTH-1:0] torf_result; 
+    toRF RFback(.RegWriteSrc(RegWriteSrc), .npc_n(npc1), .alu_result(aluresult), .dm_result(dmdata), .imm(imm), .result(torf_result));
 
-    logic [DATAWIDTH-1:0] npc1,npc2;
+    logic branch_flag;
+    branch_control bc(.branch(Branch), .N(N), .V(V), .Z(Z), .C(C), .branch_flag(branch_flag));
+
+    logic [DATAWIDTH-1:0] npc1, npc2, npc3;
     adder adder1(.A(pc_out), .B(4), .Result(npc1));
     adder adder2(.A(pc_out), .B(imm), .Result(npc2));
-
-    assign npc = (Branch && Z) ? npc2 : npc1;
+    assign npc3 = {aluresult[DATAWIDTH-1:1], 0};
+    pc_control pc_c(.npc_b(npc2), .npc_n(npc1), .npc_j(npc3), .pcflag({branch_flag, Jump}), .npc(npc));
 
 endmodule

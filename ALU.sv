@@ -25,7 +25,7 @@ module ALU#(
 )(
     input logic[DATAWIDTH-1: 0] a,
     input logic[DATAWIDTH-1: 0] b,
-    input logic[1:0] Control,
+    input logic[3:0] Control,
     output logic[DATAWIDTH-1: 0] result,
     output logic N,
     output logic V,
@@ -33,11 +33,18 @@ module ALU#(
     output logic C
     );
 
-    typedef enum logic[1 : 0] {
-        ALU_ADD = 2'b00, 
-        ALU_SUB = 2'b01,
-        ALU_AND = 2'b10,
-        ALU_OR  = 2'b11
+    typedef enum logic[3 : 0] {
+        ALU_ADD = 4'b0000, 
+        ALU_SUB = 4'b0001,
+        ALU_AND = 4'b0010,
+        ALU_OR  = 4'b0011,
+        ALU_XOR = 4'b0100,
+        ALU_SLL = 4'b0101,
+        ALU_SRL = 4'b0110,
+        ALU_SRA = 4'b0111,
+        ALU_SLT = 4'b1000,
+        ALU_SLTU = 4'b1001,
+        ALU_PassB = 4'b1010
     } alu_op;
 
     always_comb begin
@@ -60,6 +67,29 @@ module ALU#(
         end
         ALU_OR: begin
             result = a | b;
+        end
+        ALU_XOR: begin
+            result = a ^ b;
+        end
+        ALU_ALU_SLL: begin
+            result = a << b[4:0];
+        end
+        ALU_SRL: begin
+            result = a >> b[4:0];
+        end
+        ALU_SRA: begin
+            result = {a[DATAWIDTH - 1],a[DATAWIDTH - 2 : 0] >> b[4:0]};
+        end
+        ALU_SLT: begin
+            if(a[DATAWIDTH-1] == b[DATAWIDTH-1]) begin
+                result = a[DATAWIDTH-2:0] < b[DATAWIDTH-2:0] ? 1 : 0;
+            end else result = a[DATAWIDTH-1] ? 0 : 1;
+        end
+        ALU_SLTU: begin
+            result = a < b ? 1 : 0;
+        end
+        ALU_PassB: begin
+            result = b;
         end
         default: result = '0;
     endcase
