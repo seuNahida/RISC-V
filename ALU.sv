@@ -83,7 +83,7 @@ module ALU#(
         ALU_SLT: begin
             if(a[DATAWIDTH-1] == b[DATAWIDTH-1]) begin
                 result = a[DATAWIDTH-2:0] < b[DATAWIDTH-2:0] ? 1 : 0;
-            end else result = a[DATAWIDTH-1] ? 0 : 1;
+            end else result = a[DATAWIDTH-1] ? 1 : 0;
         end
         ALU_SLTU: begin
             result = a < b ? 1 : 0;

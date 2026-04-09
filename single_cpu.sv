@@ -72,6 +72,7 @@ module single_cpu #(
     ALU ALU(.a(alur1), .b(aluinputb), .Control(alucontrolflag), .result(aluresult), .N(N), .V(V), .Z(Z), .C(C));
 
     logic [3:0] we;
+    logic [31:0] din;
     store_ex storeEx(.funct(instr[14:12]), .out_temp(r2data), .out(din), .we(we));
 
     logic [DATAWIDTH-1:0] dmdata_temp, dmdata;
