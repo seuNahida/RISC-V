@@ -30,7 +30,7 @@ module ALU#(
     output logic N,
     output logic V,
     output logic Z,
-    output logic C
+    output logic C //borrow
     );
 
     typedef enum logic[3 : 0] {
@@ -71,14 +71,14 @@ module ALU#(
         ALU_XOR: begin
             result = a ^ b;
         end
-        ALU_ALU_SLL: begin
+        ALU_SLL: begin
             result = a << b[4:0];
         end
         ALU_SRL: begin
             result = a >> b[4:0];
         end
         ALU_SRA: begin
-            result = {a[DATAWIDTH - 1],a[DATAWIDTH - 2 : 0] >> b[4:0]};
+            result = $signed(a) >>> b[4:0];
         end
         ALU_SLT: begin
             if(a[DATAWIDTH-1] == b[DATAWIDTH-1]) begin

@@ -86,7 +86,7 @@ module control(
                 MemWrite = 1'b0;
                 Branch = 3'b010;
                 ALUOP = 3'b000;
-                Jump = 1'b1;
+                Jump = 1'b0;
             end
             7'b1100111: begin//jalr
                 ALUSrc = 1'b1;
@@ -106,7 +106,7 @@ module control(
                 ALUOP = 3'b101;
                 Jump = 1'b0;
             end
-            7'b0010111: begin//auipc
+            /*7'b0010111: begin//auipc
                 ALUSrc = 1'b1;
                 RegWriteSrc = 2'b00;
                 RegWrite = 1'b1;
@@ -114,7 +114,7 @@ module control(
                 Branch = 3'b011;
                 ALUOP = 3'b000;
                 Jump = 1'b0;
-            end
+            end*/
             default: begin
                 ALUSrc = 1'b0;
                 RegWriteSrc = 2'b00;

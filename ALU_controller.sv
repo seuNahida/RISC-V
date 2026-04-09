@@ -27,7 +27,7 @@ module ALU_controller(
     );
 
     always_comb begin
-        case(ALUOP)
+        casex(ALUOP)
             3'b000: ALUControl = 2'b0000;
             3'b001: ALUControl = 2'b0001;
             3'b010: begin
